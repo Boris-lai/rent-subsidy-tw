@@ -1,8 +1,4 @@
 // 計算機表單狀態 — localStorage 暫存（避免重整失去資料）
-'use client';
-
-import { useEffect } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
 
 import type { CalculatorInputForm } from '@/lib/calculator/validators';
 
@@ -69,12 +65,3 @@ export function clearFormState(): void {
   window.localStorage.removeItem(STORAGE_KEY);
 }
 
-// React hook：訂閱 RHF 表單變動並自動儲存到 localStorage
-export function useCalculatorState(form: UseFormReturn<CalculatorInputForm>): void {
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      saveFormState(values as Partial<CalculatorInputForm>);
-    });
-    return () => subscription.unsubscribe();
-  }, [form]);
-}
