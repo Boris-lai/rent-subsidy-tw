@@ -112,3 +112,7 @@
 **Week 2**：6 都 SEO 頁 + 推廣
 
 詳細執行清單見 `ARCHITECTURE.md`。
+
+---
+
+@AGENTS.md
