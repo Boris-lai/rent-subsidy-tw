@@ -13,8 +13,8 @@ import {
 } from '@/components/ui/select';
 import type { City } from '@/lib/calculator/types';
 import type { CalculatorInputForm } from '@/lib/calculator/validators';
-import { CITY_NAMES } from '@/lib/rules/central';
 import { getAreasForCity } from '@/lib/constants/city-areas';
+import { CITY_NAMES } from '@/lib/rules/central';
 
 const CITY_OPTIONS: readonly City[] = [
   'taipei',
@@ -43,7 +43,19 @@ const CITY_OPTIONS: readonly City[] = [
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
-  return <p className="mt-1 text-sm text-destructive">{message}</p>;
+  return <p className="mt-1.5 text-xs text-destructive">{message}</p>;
+}
+
+function FieldHint({ children }: { children: React.ReactNode }) {
+  return <p className="mt-1.5 text-xs text-muted-foreground">{children}</p>;
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
+      {children}
+    </h3>
+  );
 }
 
 export function HouseholdStep() {
@@ -58,76 +70,83 @@ export function HouseholdStep() {
   const areas = getAreasForCity(rentalCity);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">你住哪？</CardTitle>
+    <Card className="border-border/80 shadow-none">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-semibold tracking-tight text-foreground">
+          你住哪？
+        </CardTitle>
+        <p className="text-sm text-muted-foreground">
+          補貼金額與所得門檻依「租屋地」認定，不是戶籍地
+        </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* 租屋縣市 */}
-        <div>
-          <Label htmlFor="rental-city">租屋所在縣市</Label>
-          <Controller
-            name="rentalCity"
-            control={control}
-            render={({ field }) => (
-              <Select
-                value={field.value}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  // 換縣市時清掉舊的 area，避免帶到不存在的選項
-                  setValue('rentalArea', '');
-                }}
-              >
-                <SelectTrigger id="rental-city" className="mt-1 w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CITY_OPTIONS.map((city) => (
-                    <SelectItem key={city} value={city}>
-                      {CITY_NAMES[city]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-          <FieldError message={errors.rentalCity?.message} />
-          <p className="mt-1 text-xs text-muted-foreground">
-            補貼金額與所得門檻會依「租屋縣市」認定
-          </p>
-        </div>
+      <CardContent className="space-y-8 pt-2">
+        <div className="space-y-5">
+          <SectionHeading>租屋地</SectionHeading>
 
-        {/* 鄉鎮市區 — 僅 4 個有分區的城市顯示 */}
-        {areas && (
           <div>
-            <Label htmlFor="rental-area">鄉鎮市區</Label>
+            <Label htmlFor="rental-city" className="text-sm font-medium">
+              縣市
+            </Label>
             <Controller
-              name="rentalArea"
+              name="rentalCity"
               control={control}
               render={({ field }) => (
                 <Select
-                  value={field.value ?? ''}
-                  onValueChange={field.onChange}
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setValue('rentalArea', '');
+                  }}
                 >
-                  <SelectTrigger id="rental-area" className="mt-1 w-full">
-                    <SelectValue placeholder="請選擇鄉鎮市區" />
+                  <SelectTrigger id="rental-city" className="mt-2 h-11 w-full">
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {areas.map((area) => (
-                      <SelectItem key={area} value={area}>
-                        {area}
+                    {CITY_OPTIONS.map((city) => (
+                      <SelectItem key={city} value={city}>
+                        {CITY_NAMES[city]}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            <FieldError message={errors.rentalArea?.message} />
-            <p className="mt-1 text-xs text-muted-foreground">
-              新北、台中、台南、高雄分為「內圈／外圈」兩種金額，選擇正確區別影響補貼金額
-            </p>
+            <FieldError message={errors.rentalCity?.message} />
           </div>
-        )}
+
+          {areas && (
+            <div>
+              <Label htmlFor="rental-area" className="text-sm font-medium">
+                鄉鎮市區
+              </Label>
+              <Controller
+                name="rentalArea"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value ?? ''}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger id="rental-area" className="mt-2 h-11 w-full">
+                      <SelectValue placeholder="請選擇" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {areas.map((area) => (
+                        <SelectItem key={area} value={area}>
+                          {area}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <FieldError message={errors.rentalArea?.message} />
+              <FieldHint>
+                新北 / 台中 / 台南 / 高雄 內外圈金額不同
+              </FieldHint>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
